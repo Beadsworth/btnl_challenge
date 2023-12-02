@@ -7,11 +7,11 @@ module Solution.Soln
 
 import System.IO
 import Data.Char
-import Data.List.NonEmpty (NonEmpty)
+import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe
 
 
-lineValue :: [Char] -> Int
+lineValue :: String -> Int
 lineValue line = combined
     where
         digits = [ c | c <- line, isDigit c]
@@ -33,7 +33,9 @@ fileValue contents = sum lineValues
         lineValues = [ (lineValue line) | line <- (lines contents)]
 
 
+numbers :: [String]
 numbers = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+numbers2 :: [String]
 numbers2 = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 numbersMatch :: [(String, String)]
 numbersMatch = zip numbers numbers2
