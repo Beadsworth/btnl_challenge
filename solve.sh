@@ -7,7 +7,7 @@ container_name="$image_name-day$day-local"
 solution_dir="solutions/day$day"
 
 container_base_dir="/opt/advent_of_code"
-container_soln_dir="/opt/advent_of_code/solution"
+container_soln_dir="$container_base_dir/Solution"
 
 docker run \
     --rm \

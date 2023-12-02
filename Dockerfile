@@ -2,9 +2,8 @@
 # https://stackoverflow.com/a/71513191
 FROM debian:11
 
-SHELL ["/bin/bash", "-c"]
 
-WORKDIR /opt/advent_of_code/solution/
+SHELL ["/bin/bash", "-c"]
 
 
 RUN apt-get update
@@ -32,7 +31,13 @@ BOOTSTRAP_HASKELL_ADJUST_BASHRC=P \
 sh
 
 
+# add ghc to PATH
 RUN echo "source /root/.ghcup/env" >> /root/.bashrc
+
+
+WORKDIR /opt/advent_of_code/
+
+
 #RUN cabal update
 
 # Add just the .cabal file to capture dependencies
@@ -47,7 +52,9 @@ RUN echo "source /root/.ghcup/env" >> /root/.bashrc
 #COPY . /opt/project_euler
 #RUN cabal install
 
+
 COPY run_solution.sh /opt/advent_of_code/
+COPY solve.hs /opt/advent_of_code/
 
 
 CMD ["/root/.ghcup/bin/ghci"]
