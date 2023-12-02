@@ -1,3 +1,15 @@
+# project specific ignores
+
+## ignore prof dirs
+**/prof/
+
+## ignore compiled solutions
+solutions/*/*
+!solutions/*/**/
+!solutions/*/*.*
+
+# Haskell general ignores
+
 dist
 dist-*
 cabal-dev
