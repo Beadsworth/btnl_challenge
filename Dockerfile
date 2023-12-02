@@ -4,7 +4,7 @@ FROM debian:11
 
 SHELL ["/bin/bash", "-c"]
 
-WORKDIR /opt/advent_of_code
+WORKDIR /opt/advent_of_code/solution/
 
 
 RUN apt-get update
@@ -50,4 +50,4 @@ RUN echo "source /root/.ghcup/env" >> /root/.bashrc
 COPY run_solution.sh /opt/advent_of_code/
 
 
-CMD ["ghci"]
+CMD ["/root/.ghcup/bin/ghci"]
