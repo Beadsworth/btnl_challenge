@@ -2,6 +2,7 @@
 import System.IO
 import Data.Char
 import Data.List.NonEmpty (NonEmpty)
+import Data.Maybe
 
 
 lineValue :: [Char] -> Int
@@ -27,7 +28,76 @@ fileValue contents = sum lineValues
 
 
 numbers = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+numbers2 :: [String]
+numbers2 = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+numbersMatch :: [(String, String)]
+numbersMatch = zip numbers numbers2
+maxNumberLength = maximum [ length s | s <- numbers ]
 
+
+-- startsWith :: String -> String -> Bool
+-- startsWith line ns
+--     | length line < length ns   = False
+--     | line == ns        = True
+--     | otherwise         = startsWith subLine ns
+--     where
+--         subLine = take ((length line) - 1) line
+
+
+find ::  String -> String -> Maybe Int
+find line ns = findHelper line ns i
+    where
+        i = 0
+
+        findHelper ::  String -> String -> Int -> Maybe Int
+        findHelper lineH nsH iH
+            | length currentSubLine < (length nsH)  = Nothing
+            | currentSubLine == nsH                 = Just iH
+            | otherwise                             = findHelper newSubLine nsH newI
+            where
+                currentSubLine = take (length nsH) lineH
+                newSubLine = drop 1 lineH
+                newI = iH + 1
+
+
+-- repl :: String -> String -> String -> String
+-- repl line old new
+--     | findResult == Nothing = line
+--     | otherwise = repl newLine old new
+
+--     where
+--         findResult = find line old
+--         i = fromJust findResult
+--         newLine = (take i line) ++ new ++ (drop (i + (length old)) line)
+
+repl2 :: String -> String -> String -> String
+repl2 line old new
+    | findResult == Nothing = line
+    | otherwise = repl2 newLine old new
+
+    where
+        findResult = find line old
+        i = fromJust findResult
+        -- hacky way to allow overlap
+        newS = (take 1 old) ++ new ++ (drop ((length old) - 1) old)
+        newLine = (take i line) ++ newS ++ (drop (i + (length old)) line)
+
+
+replAll :: String -> String
+replAll line = replAllNumbers line numbersMatch
+    where
+        replAllNumbers :: String -> [(String, String)] -> String
+        replAllNumbers line list
+            | length list < 1 = line
+            | otherwise = replAllNumbers newLine newList
+            where
+                (old, new) = head list
+                newList = drop 1 list 
+                newLine = repl2 line old new
+
+
+-- hasSDigit :: String -> Bool
+-- hasSDigit line = or [ contains line number | number <- numbers ]
 
 
 -- solutions
@@ -39,9 +109,9 @@ inputFile = "input.txt"
 solve1 :: String -> Int
 solve1 contents = fileValue contents
 
-
+-- the words overlap!
 solve2 :: String -> Int
-solve2 contents = fileValue contents
+solve2 contents = fileValue (replAll contents)
 
 
 ----
