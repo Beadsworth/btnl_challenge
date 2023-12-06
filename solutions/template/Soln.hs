@@ -5,10 +5,11 @@ module Solution.Soln
 ) where 
 
 
--- solutions
+-- solution part 1
 solve1 :: String -> Int
 solve1 contents = 0
 
--- the words overlap!
+
+-- solution part 2
 solve2 :: String -> Int
 solve2 contents = 0
