@@ -73,6 +73,14 @@ traverseMap sectionMap keyList input
             result = mapLookup mapList input
 
 
+-- group list into chunks of size n
+-- https://stackoverflow.com/a/12876438
+group :: Int -> [a] -> [[a]]
+group _ [] = []
+group n l
+  | n > 0 = (take n l) : (group n (drop n l))
+  | otherwise = error "Negative or zero n"
+
 
 -- solution part 1
 solve1 :: String -> Int
@@ -86,8 +94,33 @@ solve1 contents = result
         seedLocations = [ getLocation seed | seed <- seeds ]
         result = minimum seedLocations
 
-        
+
+listToPairs :: [a] -> [(a, a)]
+listToPairs seedList = pairs
+    where
+        chunks =  group 2 seedList
+        pairs = [ (x, y) | [x, y] <- chunks ]
+
 
 -- solution part 2
-solve2 :: String -> Int
-solve2 contents = 0
+-- solve2 :: String -> Int
+solve2 contents = result
+    where
+        (seeds, sectionMap) = parseMap contents
+        
+        getLocation :: (Int -> Int)
+        getLocation = traverseMap sectionMap mapKeys
+
+        seedPairs = listToPairs seeds
+        allSeeds = concat [ [seedStart..(seedStart + seedRange)] | (seedStart, seedRange) <- seedPairs ]
+        -- 2,280,650,877 numbers to check
+        
+        seedLocations = [ getLocation seed | seed <- allSeeds ]
+        result = minimum seedLocations
+
+
+-- 147 - 25 = 122
+-- traverseMap: 105971219
+-- 105971219 / 7 = 15138745
+-- 2,280,650,877 / 15,138,745 = 151
+-- 151 * 122 sec = 5 hours!!!
