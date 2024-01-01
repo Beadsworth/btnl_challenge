@@ -11,4 +11,5 @@ then
     mkdir -p $prof_dir
 fi
 
-/root/.ghcup/bin/ghc -O2 --make -o "$solution_dir/solve" "$container_base_dir/solve" -prof -auto-all -fforce-recomp && "$solution_dir/solve" +RTS -p -po"$prof_path"
+cabal build
+cabal run solve -- +RTS -p -po"$prof_path"
