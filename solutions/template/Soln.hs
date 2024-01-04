@@ -1,8 +1,8 @@
 -- day00
 module Solution.Soln  
-( solve1  
-, solve2  
-) where 
+( solve1
+, solve2
+) where
 
 
 -- solution part 1
