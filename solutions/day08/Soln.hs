@@ -80,7 +80,7 @@ solve1 contents = result
 
 
 -- solution part 2
--- solve2 :: String -> Int
+solve2 :: String -> Int
 solve2 contents = result
     where
         (path, navMap) = parseFile contents
