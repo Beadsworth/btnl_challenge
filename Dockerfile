@@ -1,4 +1,4 @@
-# TODO: check out this installation guide
+# Docker installation inspired by:
 # https://stackoverflow.com/a/71513191
 FROM debian:11
 
