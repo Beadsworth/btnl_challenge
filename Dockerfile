@@ -67,4 +67,7 @@ RUN cabal build --only-dependencies -j4 --enable-library-profiling
 COPY ./vwap /vwap/
 
 
+RUN cabal build
+
+
 CMD ["ghci"]

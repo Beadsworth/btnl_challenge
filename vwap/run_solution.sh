@@ -10,5 +10,4 @@ then
     mkdir -p $prof_dir
 fi
 
-cabal build
 cabal run solve -- +RTS -p -po"$prof_path"
