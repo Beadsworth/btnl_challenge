@@ -12,7 +12,6 @@ main :: IO ()
 main = do
 
     putStrLn "thinking..."
-    
 
     contents <- getContents
     putStrLn contents
