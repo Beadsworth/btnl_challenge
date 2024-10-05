@@ -17,7 +17,7 @@ To build in top-level changes into the docker image (i.e. not solutions), run:
 To solve a problem (solutions are mounted in an editable volume), run:
 
 ```
-./run_solution.sh $day
+./prof.sh $day
 ```
 
 where `day=` the current day you are working on (int).

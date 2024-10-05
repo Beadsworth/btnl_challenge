@@ -6,9 +6,6 @@ FROM debian:11
 SHELL ["/bin/bash", "-c"]
 
 
-RUN useradd -ms /bin/bash btnl
-
-
 RUN apt-get update
 RUN apt-get install -y \
 build-essential \

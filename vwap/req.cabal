@@ -56,7 +56,7 @@ common warnings
         -threaded
         -fprof-auto
 
-executable solve
+executable main
     -- Import common warning flags.
     import:           warnings
 

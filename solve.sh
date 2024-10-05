@@ -4,16 +4,16 @@
 image_name="btnl_challenge"
 container_name="$image_name-local"
 output_dir="output"
-prof_dir="prof"
+prof_dir="vwap/prof"
 
 container_base_dir="/vwap"
 container_output_dir="$container_base_dir/$output_dir"
-container_prof_dir="$container_base_dir/$prof_dir"
+container_prof_dir="/$prof_dir"
 
-docker run \
+cat | docker run \
     --rm \
-    -it \
+    -i \
     --name "$container_name" \
     -v "$(pwd)/$prof_dir":"$container_prof_dir" \
     $image_name \
-    "$container_base_dir/run_solution.sh"
+    "$container_base_dir/prof.sh"
