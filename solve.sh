@@ -2,11 +2,11 @@
 
 # format day arg
 printf -v day "%02d" $1
-image_name="advent_of_code_2023"
+image_name="btnl_challenge"
 container_name="$image_name-day$day-local"
 solution_dir="solutions/day$day"
 
-container_base_dir="/opt/advent_of_code"
+container_base_dir="/opt/btnl_challenge"
 container_soln_dir="$container_base_dir/Solution"
 
 docker run \

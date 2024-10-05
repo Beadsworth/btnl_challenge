@@ -1,6 +1,6 @@
 #!/bin/bash
 
-image_name="advent_of_code_2023"
+image_name="btnl_challenge"
 container_name="$image_name-ghci-local"
 
 

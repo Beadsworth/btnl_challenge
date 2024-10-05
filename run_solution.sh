@@ -1,6 +1,6 @@
 #!/bin/bash
 start_time="$(date +"%y_%m_%d-%H_%M_%S")"
-container_base_dir="/opt/advent_of_code"
+container_base_dir="/opt/btnl_challenge"
 solution_dir=$1
 prof_dir="$solution_dir/prof"
 prof_path="$prof_dir/solve.$start_time"

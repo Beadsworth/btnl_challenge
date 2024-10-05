@@ -1,4 +1,4 @@
-# Advent of Code 2023
+# BTNL Challenge
 
 The project uses docker to run `ghc` and `ghci`.
 
@@ -30,6 +30,6 @@ To run an interactive `ghci` session, run:
 
 ## Inside the container
 
-The working directory is `/opt/advent_of_code/`.
-The current day's solution directory will be "volumed" to `/opt/advent_of_code/Solutions/`.
+The working directory is `/opt/btnl_challenge/`.
+The current day's solution directory will be "volumed" to `/opt/btnl_challenge/Solutions/`.
 When you run `solve.sh` outside the container, `solve.hs` will import the current day's packages, then compile & run inside the container.

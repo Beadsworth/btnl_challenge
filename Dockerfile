@@ -39,7 +39,7 @@ RUN ln -s /root/.ghcup/bin/ghc /usr/bin/ghc
 RUN ln -s /root/.ghcup/bin/ghci /usr/bin/ghci
 
 
-WORKDIR /opt/advent_of_code/
+WORKDIR /opt/btnl_challenge/
 
 # allow cabal to profile
 # RUN sed -i 's/-- library-profiling:/-- library-profiling: True/' /root/.config/cabal/config
@@ -49,7 +49,7 @@ RUN cabal update
 
 
 # Add just the .cabal file to capture dependencies
-COPY ./req.cabal /opt/advent_of_code/req.cabal
+COPY ./req.cabal /opt/btnl_challenge/req.cabal
 
 
 # all profiling
@@ -61,9 +61,9 @@ RUN cabal configure --enable-profiling --enable-library-profiling --enable-execu
 RUN cabal build --only-dependencies -j4 --enable-library-profiling
 
 
-COPY LICENSE /opt/advent_of_code/
-COPY run_solution.sh /opt/advent_of_code/
-COPY solve.hs /opt/advent_of_code/
+COPY LICENSE /opt/btnl_challenge/
+COPY run_solution.sh /opt/btnl_challenge/
+COPY solve.hs /opt/btnl_challenge/
 
 
 CMD ["ghci"]
