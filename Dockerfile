@@ -6,6 +6,9 @@ FROM debian:11
 SHELL ["/bin/bash", "-c"]
 
 
+RUN useradd -ms /bin/bash btnl
+
+
 RUN apt-get update
 RUN apt-get install -y \
 build-essential \
@@ -39,7 +42,7 @@ RUN ln -s /root/.ghcup/bin/ghc /usr/bin/ghc
 RUN ln -s /root/.ghcup/bin/ghci /usr/bin/ghci
 
 
-WORKDIR /opt/btnl_challenge/
+WORKDIR /vwap/
 
 # allow cabal to profile
 # RUN sed -i 's/-- library-profiling:/-- library-profiling: True/' /root/.config/cabal/config
@@ -49,7 +52,7 @@ RUN cabal update
 
 
 # Add just the .cabal file to capture dependencies
-COPY ./req.cabal /opt/btnl_challenge/req.cabal
+COPY ./vwap/req.cabal /vwap/req.cabal
 
 
 # all profiling
@@ -61,9 +64,7 @@ RUN cabal configure --enable-profiling --enable-library-profiling --enable-execu
 RUN cabal build --only-dependencies -j4 --enable-library-profiling
 
 
-COPY LICENSE /opt/btnl_challenge/
-COPY run_solution.sh /opt/btnl_challenge/
-COPY solve.hs /opt/btnl_challenge/
+COPY ./vwap /vwap/
 
 
 CMD ["ghci"]

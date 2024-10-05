@@ -1,7 +1,8 @@
 # project specific ignores
+/output/
 
 ## ignore prof dirs
-**/prof/
+/prof/
 
 ## ignore compiled solutions
 solutions/*/*
