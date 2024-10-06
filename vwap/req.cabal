@@ -56,12 +56,12 @@ common warnings
         -threaded
         -fprof-auto
 
-executable main
+executable VWAP
     -- Import common warning flags.
     import:           warnings
 
     -- .hs or .lhs file containing the Main module.
-    main-is:          main.hs
+    main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
     -- other-modules:
@@ -79,7 +79,7 @@ executable main
     hs-source-dirs:
 
     other-modules:
-        Solution.Soln
+        VWAP.In
 
     -- Base language which the package is written in.
     default-language: Haskell2010

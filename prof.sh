@@ -10,4 +10,4 @@ then
     mkdir -p $prof_dir
 fi
 
-cabal run main -- +RTS -p -po"$prof_path"
+cabal run VWAP -- +RTS -p -po"$prof_path"
