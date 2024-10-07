@@ -1,94 +1,44 @@
 import VWAP.In (Match (..), Side (..))
-import System.IO (hGetContents, stdin)
+import System.IO (hGetLine, stdin, isEOF)
+import Control.Monad (unless)
 import Data.List.Split (splitOn)
+import Data.Int (Int64)
+import Data.Word (Word32)
 
--- Assuming the CSV has no headers and the second column contains the counts (integer)
+
+parseLine :: String -> Match
+parseLine line = match
+    where
+        [col0, col1, col2, col3, col4, col5] = splitOn "," line
+        match = Match   { makerAcntID = col0
+                        , takerAcntID = col1
+                        , prodSym = col2
+                        , takerSide = read col3
+                        , price = read col4
+                        , quantity = read col5
+                        }
+
+
+processLine :: String -> IO ()
+processLine line = putStrLn parsedLine
+    where
+        parsedLine = show $ parseLine line
+
+
+processStdin :: IO ()
+processStdin = do
+
+    eof <- isEOF
+    unless eof $ do
+        line <- hGetLine stdin
+        processLine line
+        processStdin  -- Recursively read the next line
+
+
 main :: IO ()
 main = do
-    -- Read from stdin lazily
-    input <- hGetContents stdin
+    putStrLn "working..."
 
-    -- Split input into lines
-    let csvLines = lines input
+    processStdin
 
-    -- Map over each line, parse the second field as an Int, and sum them
-    let counts = map (read . (!! 5) . splitOn ",") csvLines :: [Int]
-    let cumulativeSum = sum counts
-
-    -- Print the cumulative sum of the second column
-    print cumulativeSum
-
-
-
-
--- import Data.Csv
--- import GHC.Generics (Generic)
--- import qualified Data.ByteString.Lazy as BL
--- import qualified Data.Vector as V
-
-
--- -- Automatically generate a FromRecord instance for parsing CSV
--- instance FromRecord Person where
---   parseRecord v
---     | V.length v == 4 = Person <$> v .! 0 <*> v .! 1 <*> v .! 2 <*> v .! 3  -- Assuming count is the fourth column
---     | otherwise = fail "Invalid record length"
-
-
--- parseLine :: String -> Match
--- parseLine (a, b, c, d, e, f) = match
---     where
---         match = Match   { makerAcntID = a
---                         , takerAcntID = b
---                         , prodSym = c
---                         , takerSide = d
---                         , price = e
---                         , quantity = f
---                         }
-
-
--- ----
--- main :: IO ()
--- main = do
-
---     putStrLn "thinking..."
-
-
---     -- Read CSV data from stdin
---     csvData <- BL.getContents
---     lines = lines csvData
---     case decode NoHeader csvData of
---         Left err -> putStrLn ("Error: " ++ err)
---         Right v -> do
-
-
-            
-
---             -- let cumulativeCount = V.foldl' (\acc person -> acc + count person) 0 v
---             putStrLn "end"
---     -- let match1 = Match  { makerAcntID = "Tyrell Corp A123"
---     --                     , takerAcntID = "Wayland-Yutani Corp BC32"
---     --                     , prodSym = "BUSU1"
---     --                     , takerSide = Bid
---     --                     , price = 42
---     --                     , quantity = 10
---     --                     }
---     -- let match2 = Match  { makerAcntID = "CHOAM Arakis Z23"
---     --                     , takerAcntID = "OPEC 897"
---     --                     , prodSym = "BUIZ1"
---     --                     , takerSide = Ask
---     --                     , price = (-2)
---     --                     , quantity = 14
---     --                     }
-    
---     -- let match3 = Match  { makerAcntID = "InGen Tech BCZ232"
---     --                     , takerAcntID = "BioSynFG332"
---     --                     , prodSym = "BUSM2"
---     --                     , takerSide = Bid
---     --                     , price = 43250
---     --                     , quantity = 23
---     --                     }
-
---     -- contents <- getContents
---     -- putStrLn contents
-
---     putStrLn "done!"
+    putStrLn "done!"
