@@ -1,18 +1,7 @@
-import VWAP.In (Match (..), parseCSVLine, updatePreReport, emptyPreReport, PreReport (..))
-import VWAP.Out (preReport2Json)
+import VWAP.In (processCSVLine, emptyPreReport, PreReport)
+import VWAP.Out (preReport2ReportJson)
 import System.IO (hGetLine, stdin, hIsEOF)
 import qualified Data.ByteString.Lazy.Char8 as B
-
-
-
--- Process a single line from the CSV
-processLine :: PreReport -> String -> PreReport
-processLine preReport line = updatedPreReport
-    where
-        -- parse a single CSV line
-        match = parseCSVLine line
-        -- update cumulative preReport map with the match
-        updatedPreReport = updatePreReport preReport match
 
 
 -- Function to process stdin line by line and sum quantities
@@ -23,15 +12,15 @@ processStdin preReport = do
         then return preReport
         else do
             line <- hGetLine stdin
-            let newPreReport = processLine preReport line
+            let newPreReport = processCSVLine preReport line
             processStdin newPreReport
 
 
 main :: IO ()
 main = do
     -- process entire CSV input, starting from empty PreReport
-    cumPreReport <- processStdin emptyPreReport
+    preReport <- processStdin emptyPreReport
     -- convert PreReport into Report
-    let reportJSON = preReport2Json cumPreReport
+    let reportJSON = preReport2ReportJson preReport
     -- print Report to stdout
     B.putStrLn reportJSON

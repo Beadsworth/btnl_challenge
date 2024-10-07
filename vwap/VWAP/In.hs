@@ -1,14 +1,11 @@
 -- Module For Parsing input CSV
 
 module VWAP.In  
-( Side (..)
-, Match (..)
+( PreReport (..)
 , PreReportValues (..)
-, PreReport (..)
 , Symbol
-, parseCSVLine
+, processCSVLine
 , emptyPreReport
-, updatePreReport
 ) where
 
 
@@ -99,6 +96,15 @@ updatePreReport preReport match = result
         nextPreReportValues = PreReportValues {cumPQ = (pq match), cumQuant = quantity'}
         -- if symbol is absent, add the new PreReportValue
         --  if symbol already exists, add new PreRportValues to existing values
-        --  use strict function since stdin is parsed
-        --  line-by-line anyway
+        --  use strict function since stdin is parsed line-by-line anyway
         result = Map.Strict.insertWith addPreReportValues symbol' nextPreReportValues preReport
+
+
+-- process a single line from the CSV
+processCSVLine :: PreReport -> String -> PreReport
+processCSVLine preReport line = updatedPreReport
+    where
+        -- parse a single CSV line
+        match = parseCSVLine line
+        -- update cumulative preReport map with the match
+        updatedPreReport = updatePreReport preReport match

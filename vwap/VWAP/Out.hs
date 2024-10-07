@@ -3,7 +3,7 @@
 
 
 module VWAP.Out 
-( preReport2Json
+( preReport2ReportJson
 ) where
 
 
@@ -61,5 +61,5 @@ report2Json report = encode $ toJSON report
 
 
 -- convenience function, just export this
-preReport2Json :: PreReport -> B.ByteString
-preReport2Json = report2Json . preReport2Report
+preReport2ReportJson :: PreReport -> B.ByteString
+preReport2ReportJson = report2Json . preReport2Report
