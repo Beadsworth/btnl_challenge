@@ -55,6 +55,7 @@ common warnings
         -O2
         -threaded
         -fprof-auto
+        -rtsopts
 
 executable VWAP
     -- Import common warning flags.
