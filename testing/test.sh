@@ -1,13 +1,14 @@
 #!/bin/bash
 
 # Path to the binary executable
-BINARY="./your_binary_executable"
+BIN_NAME="VWAP"
+BINARY="$(cabal list-bin $BIN_NAME)"
 
 # Directory containing the test CSV files
-CSV_DIR="./test_csvs"
+CSV_DIR="/testing/test_csvs"
 
 # Directory containing the expected JSON output files (for valid inputs)
-EXPECTED_DIR="./expected_jsons"
+EXPECTED_DIR="/testing/expected_jsons"
 
 # Function to normalize JSON for comparison (ignoring order)
 normalize_json() {
@@ -34,11 +35,11 @@ run_tests() {
 
         # Check for poorly formatted CSV files
         if ! is_well_formatted_csv "$csv_file"; then
-            echo "Test $base_name: Poorly formatted CSV - expecting failure"
+            # echo "Test $base_name: Poorly formatted CSV - expecting failure"
             if ! output_json=$("$BINARY" < "$csv_file" 2>&1); then
                 echo "Test $base_name: PASS (correctly failed for poorly formatted input)"
             else
-                echo "Test $base_name: FAIL (should have failed)"
+                echo "Test $base_name: FAIL (should have failed for poorly formatted input)"
                 echo "Output: $output_json"
             fi
             continue
