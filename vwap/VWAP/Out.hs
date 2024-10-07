@@ -1,19 +1,59 @@
--- Module For constructing output JSON
+-- Module For Parsing input CSV
+{-# LANGUAGE DeriveGeneric #-}
 
-import qualified Data.Text as Text
+
+module VWAP.Out 
+( Report (..)
+, preReport2Json
+) where
+
+
+import GHC.Generics (Generic)
+import Data.Aeson (ToJSON, toJSON, encode)
 import qualified Data.Map as Map
-import qualified Data.List as List
-import Data.Maybe (isJust, fromJust, catMaybes)
-import Data.Word (Word32)
+import qualified Data.ByteString.Lazy.Char8 as B
+import VWAP.In (PreReport, PreReportValues (..), Symbol)
+import Text.Printf (printf)
 
 
-type MakerAcntID = Str
-type TakerAcntID = Str
-type ProdSym = Str
 
-data TakerSide = Ask | Bid
-    deriving (Eq, Ord, Show, Read)
+data ReportValues = ReportValues
+    { vwap :: Double
+    , volume :: Int
+    } deriving (Show, Generic)
 
-type Price = Int64
--- Word32 is actually uint32
-type Quantity = Word32
+instance ToJSON ReportValues
+
+
+-- a map of Symbol-to-ReportValues
+type Report = Map.Map Symbol ReportValues
+
+
+-- volume = cumQuant
+-- VWAP = cumPQ / volume
+convertValues :: PreReportValues -> ReportValues
+convertValues preReportValues = reportValues
+    where
+        volume = cumQuant preReportValues
+        doubleCumPQ = fromIntegral (cumPQ preReportValues) :: Double
+        rawVWAP = doubleCumPQ / fromIntegral volume
+        vwap = read (printf "%.1f" rawVWAP) :: Double
+        reportValues = ReportValues {vwap = vwap, volume = volume}
+
+
+-- convert PreReport Map to Report
+preReport2Report :: PreReport -> Report
+preReport2Report preReport = result
+    where
+        result = Map.map convertValues preReport
+
+
+
+-- Function to convert a Map to JSON
+report2Json :: Report -> B.ByteString
+report2Json report = encode $ toJSON report
+
+
+
+preReport2Json :: PreReport -> B.ByteString
+preReport2Json = report2Json . preReport2Report

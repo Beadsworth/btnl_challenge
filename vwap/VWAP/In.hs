@@ -3,14 +3,15 @@
 module VWAP.In  
 ( Side (..)
 , Match (..)
+, PreReportValues (..)
 , PreReport (..)
+, Symbol
 , parseCSVLine
 , emptyPreReport
 , updatePreReport
 ) where
 
 
-import Data.Maybe (isJust, fromJust, catMaybes)
 import Data.List.Split (splitOn)
 import Data.Int (Int64)
 import Data.Word (Word32)
@@ -46,17 +47,11 @@ data PreReportValues = PreReportValues
     } deriving (Show)
 
 
-data ReportValues = ReportValues
-    { vwap :: Int
-    , volume :: Int
-    } deriving (Show) 
-
-
 -- a map of Symbol-to-PreReportValues
 type PreReport = Map.Map Symbol PreReportValues
--- type for final report
-type Report = Map.Map Symbol ReportValues
 
+
+-- return empty Map of correct type
 emptyPreReport :: PreReport
 emptyPreReport = Map.empty :: PreReport
 
@@ -95,12 +90,15 @@ addPreReportValues preReportValues1 preReportValues2 = result
         result = PreReportValues {cumPQ = addedCumPQ, cumQuant = addedCumQuant}
         
 
+-- update a PreReport map with one Match reading
 updatePreReport :: PreReport -> Match -> PreReport
 updatePreReport preReport match = result
     where
         symbol' = symbol match
         quantity' = fromIntegral $ quantity match
         nextPreReportValues = PreReportValues {cumPQ = (pq match), cumQuant = quantity'}
-        -- use strict function since stdin is parsed
-        -- line-by-line anyway
+        -- if symbol is absent, add the new PreReportValue
+        --  if symbol already exists, add new PreRportValues to existing values
+        --  use strict function since stdin is parsed
+        --  line-by-line anyway
         result = Map.Strict.insertWith addPreReportValues symbol' nextPreReportValues preReport

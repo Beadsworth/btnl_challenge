@@ -1,6 +1,9 @@
 import VWAP.In (Match (..), parseCSVLine, updatePreReport, emptyPreReport, PreReport (..))
+import VWAP.Out (preReport2Json)
 import System.IO (hGetLine, stdin, hIsEOF)
-import Control.Monad (unless)
+import qualified Data.ByteString.Lazy.Char8 as B
+
+
 
 -- Process a single line from the CSV
 processLine :: PreReport -> String -> PreReport
@@ -26,10 +29,9 @@ processStdin preReport = do
 
 main :: IO ()
 main = do
-    putStrLn "working..."
-
-    -- process entire CSV input
+    -- process entire CSV input, starting from empty PreReport
     cumPreReport <- processStdin emptyPreReport
-    putStrLn $ show cumPreReport
-
-    putStrLn "done!"
+    -- convert PreReport into Report
+    let reportJSON = preReport2Json cumPreReport
+    -- print Report to stdout
+    B.putStrLn reportJSON
