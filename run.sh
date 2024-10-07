@@ -16,4 +16,4 @@ cat | docker run \
     --name "$container_name" \
     -v "$(pwd)/$prof_dir":"$container_prof_dir" \
     $image_name \
-    "/util/prof.sh"
+    cabal run VWAP

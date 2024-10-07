@@ -59,7 +59,6 @@ RUN cabal configure --enable-profiling --enable-library-profiling --enable-execu
 RUN cabal build --only-dependencies -j4 --enable-library-profiling
 
 
-COPY ./prof.sh /util/prof.sh
 COPY ./vwap /vwap/
 COPY ./testing /testing
 

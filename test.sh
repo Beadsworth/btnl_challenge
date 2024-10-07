@@ -12,7 +12,7 @@ container_prof_dir="/$prof_dir"
 
 docker run \
     --rm \
-    -it \
+    -i \
     --name "$container_name" \
     -v "$(pwd)/$prof_dir":"$container_prof_dir" \
     $image_name \

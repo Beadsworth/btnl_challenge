@@ -1,8 +1,12 @@
 #!/bin/bash
 
+# group by start time
+start_time="$(date +"%y_%m_%d-%H_%M_%S")"
+
 # Path to the binary executable
 BIN_NAME="VWAP"
 BINARY="$(cabal list-bin $BIN_NAME)"
+# BINARY="$(/util/prof.sh "name")"
 
 # Directory containing the test CSV files
 CSV_DIR="/testing/test_csvs"
@@ -15,28 +19,35 @@ normalize_json() {
     echo "$1" | jq -S .  # Using jq to sort JSON keys
 }
 
+
+run_prof() {
+    name="$1"
+    csv_path="$2"
+    container_base_dir="/vwap"
+    prof_dir="/prof"
+    prof_sub_dir="$prof_dir/$start_time/$name"
+    prof_path="$prof_sub_dir/profiling"
+    
+    # create prof dir if needed
+    if [[ ! -d $prof_sub_dir ]]
+    then
+        mkdir -p $prof_sub_dir
+    fi
+
+    cat "$csv_path" | cabal run VWAP -- +RTS -p -po"$prof_path" -s"$prof_path.s"
+}
+
+
 # Run the tests
 run_tests() {
     for csv_file in "$CSV_DIR"/*.csv; do
         # Get the base filename without extension
         base_name=$(basename "$csv_file" .csv)
 
-        # # Check for empty CSV files
-        # if [[ ! -s "$csv_file" ]]; then
-        #     echo "Test $base_name: Empty CSV - expecting failure"
-        #     if ! output_json=$("$BINARY" < "$csv_file" 2>&1); then
-        #         echo "Test $base_name: PASS (correctly failed for empty input)"
-        #     else
-        #         echo "Test $base_name: FAIL (should have failed)"
-        #         echo "Output: $output_json"
-        #     fi
-        #     continue
-        # fi
-
         # Check for poorly formatted CSV files
         if ! is_well_formatted_csv "$csv_file"; then
             # echo "Test $base_name: Poorly formatted CSV - expecting failure"
-            if ! output_json=$("$BINARY" < "$csv_file" 2>&1); then
+            if ! output_json=$(run_prof "$base_name" "$csv_file" 2>&1); then
                 echo "Test $base_name: PASS (correctly failed for poorly formatted input)"
             else
                 echo "Test $base_name: FAIL (should have failed for poorly formatted input)"
@@ -55,7 +66,7 @@ run_tests() {
         fi
 
         # Run the binary and capture the output
-        output_json=$("$BINARY" < "$csv_file")
+        output_json=$(run_prof "$base_name" "$csv_file")
 
         # Normalize the output and expected JSON for comparison
         normalized_output=$(normalize_json "$output_json")
