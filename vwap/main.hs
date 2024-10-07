@@ -1,5 +1,5 @@
 import VWAP.In (Match (..), parseCSVLine, updatePreReport, emptyPreReport, PreReport (..))
-import System.IO (hGetLine, stdin, isEOF)
+import System.IO (hGetLine, stdin, hIsEOF)
 import Control.Monad (unless)
 
 -- Process a single line from the CSV
@@ -11,24 +11,25 @@ processLine preReport line = updatedPreReport
         -- update cumulative preReport map with the match
         updatedPreReport = updatePreReport preReport match
 
--- Recursively read stdin line-by-line
--- until EOF is reached
+
+-- Function to process stdin line by line and sum quantities
 processStdin :: PreReport -> IO PreReport
 processStdin preReport = do
-    eof <- isEOF
-    unless eof $ do
-        line <- hGetLine stdin
-        let newPreReport = processLine preReport line
-        -- pass updated preReport to next call
-        processStdin newPreReport
+    eof <- hIsEOF stdin
+    if eof
+        then return preReport
+        else do
+            line <- hGetLine stdin
+            let newPreReport = processLine preReport line
+            processStdin newPreReport
+
 
 main :: IO ()
 main = do
     putStrLn "working..."
 
-    let preReport = emptyPreReport
     -- process entire CSV input
-    cumPreReport <- processStdin preReport
+    cumPreReport <- processStdin emptyPreReport
     putStrLn $ show cumPreReport
 
     putStrLn "done!"
