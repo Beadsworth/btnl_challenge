@@ -22,7 +22,14 @@ data ReportValues = ReportValues
     , volume :: Int
     } deriving (Show, Generic)
 
+-- set vwap precision
 instance ToJSON ReportValues
+    where
+        toJSON (ReportValues vwap volume) =
+            object 
+                [ "vwap" .= (printf "%.1f" vwap :: String)
+                , "volume" .= volume
+                ]
 
 
 -- a map of Symbol-to-ReportValues
