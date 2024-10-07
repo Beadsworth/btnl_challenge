@@ -1,7 +1,15 @@
 import VWAP.In (processCSVLine, emptyPreReport, PreReport)
 import VWAP.Out (preReport2ReportJson)
 import System.IO (hGetLine, stdin, hIsEOF)
+-- import qualified Data.ByteString.Lazy.Char8 as BL
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BL
+import Data.Csv
+import qualified Data.Vector as V
 import qualified Data.ByteString.Lazy.Char8 as B
+
+
+
 
 
 -- Function to process stdin line by line and sum quantities
@@ -11,7 +19,8 @@ processStdin preReport = do
     if eof
         then return preReport
         else do
-            line <- hGetLine stdin
+            line <- BL.hGetContents
+            lines = lines
             let newPreReport = processCSVLine preReport line
             processStdin newPreReport
 

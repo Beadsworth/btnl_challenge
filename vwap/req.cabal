@@ -76,7 +76,9 @@ executable VWAP
                       text,
                       containers >=0.4.0.0,
                       aeson >=2.0,
-                      bytestring
+                      bytestring,
+                      cassava >= 0.5,
+                      vector
 
     -- Directories containing source files.
     hs-source-dirs:

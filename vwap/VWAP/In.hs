@@ -1,5 +1,6 @@
 -- Module For Parsing input CSV
 
+
 module VWAP.In  
 ( PreReport (..)
 , PreReportValues (..)
@@ -14,11 +15,17 @@ import Data.Int (Int64)
 import Data.Word (Word32)
 import qualified Data.Map as Map
 import qualified Data.Map.Strict as Map.Strict
+import qualified Data.ByteString.Lazy as BL
+import Data.Text    (Text)
+import Data.Csv
+import qualified Data.Vector as V
+import Control.Monad (mzero)
+
 
 
 -- Word32 is actually uint32
-type UInt64 = Word32
-type Symbol = String
+type UInt32 = Word32
+type Symbol = Text
 
 
 data Side = Ask | Bid
@@ -27,13 +34,25 @@ data Side = Ask | Bid
 
 -- input CSV lines
 data Match = Match
-    { maker :: String
-    , taker :: String
-    , symbol :: Symbol
-    , side :: Side
-    , price :: Int64
-    , quantity :: UInt64
+    { maker :: !Text
+    , taker :: !Text
+    , symbol :: !Symbol
+    , side :: !Text
+    , price :: !Int64
+    , quantity :: !UInt32
     } deriving (Show)
+
+
+-- Define how to get a Match from a record (CSV row)
+instance FromRecord Match where
+  parseRecord record =
+    Match
+      <$> record .! 0
+      <*> record .! 1
+      <*> record .! 2
+      <*> record .! 3
+      <*> record .! 4
+      <*> record .! 5
 
 
 -- sums of (price * quantity) & volume
@@ -56,17 +75,28 @@ emptyPreReport = Map.empty :: PreReport
 -- simple CSV line parser
 -- probably could use cassava library
 --  if more advanced CSV parsing is needed
-parseCSVLine :: String -> Match
+parseCSVLine :: BL.ByteString -> Match
 parseCSVLine line = match
     where
-        [col0, col1, col2, col3, col4, col5] = splitOn "," line
-        match = Match   { maker = col0
-                        , taker = col1
-                        , symbol = col2
-                        , side = read col3
-                        , price = read col4
-                        , quantity = read col5
-                        }
+        match = 
+            case decode NoHeader line of
+                Left err -> error err
+                Right v  ->
+                    if V.null v
+                        then error "No data found"
+                        else (V.head v)
+
+    -- where
+    --     match = decode NoHeader line
+        -- -- char 44 is comma
+        -- [col0, col1, col2, col3, col4, col5] = splitOn "," line
+        -- match = Match   { maker = col0
+        --                 , taker = col1
+        --                 , symbol = col2
+        --                 , side = read col3
+        --                 , price = read col4
+        --                 , quantity = read col5
+        --                 }
 
 
 -- calculate p*q for one match 
@@ -101,7 +131,7 @@ updatePreReport preReport match = result
 
 
 -- process a single line from the CSV
-processCSVLine :: PreReport -> String -> PreReport
+processCSVLine :: PreReport -> BL.ByteString -> PreReport
 processCSVLine preReport line = updatedPreReport
     where
         -- parse a single CSV line
