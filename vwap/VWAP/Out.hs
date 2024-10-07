@@ -1,26 +1,25 @@
 -- Module For Parsing input CSV
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 
 module VWAP.Out 
-( Report (..)
-, preReport2Json
+( preReport2Json
 ) where
 
 
-import GHC.Generics (Generic)
-import Data.Aeson (ToJSON, toJSON, encode)
+import Data.Aeson (ToJSON, toJSON, object, (.=), encode, toEncoding)
 import qualified Data.Map as Map
 import qualified Data.ByteString.Lazy.Char8 as B
 import VWAP.In (PreReport, PreReportValues (..), Symbol)
 import Text.Printf (printf)
 
 
-
+-- final values reported for each symbol
 data ReportValues = ReportValues
     { vwap :: Double
     , volume :: Int
-    } deriving (Show, Generic)
+    } deriving (Show)
+
 
 -- set vwap precision
 instance ToJSON ReportValues
@@ -41,6 +40,7 @@ type Report = Map.Map Symbol ReportValues
 convertValues :: PreReportValues -> ReportValues
 convertValues preReportValues = reportValues
     where
+        -- volume should never be zero, skipping validation...
         volume = cumQuant preReportValues
         doubleCumPQ = fromIntegral (cumPQ preReportValues) :: Double
         rawVWAP = doubleCumPQ / fromIntegral volume
@@ -55,12 +55,11 @@ preReport2Report preReport = result
         result = Map.map convertValues preReport
 
 
-
 -- Function to convert a Map to JSON
 report2Json :: Report -> B.ByteString
 report2Json report = encode $ toJSON report
 
 
-
+-- convenience function, just export this
 preReport2Json :: PreReport -> B.ByteString
 preReport2Json = report2Json . preReport2Report
