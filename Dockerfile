@@ -1,6 +1,6 @@
 # Docker installation inspired by:
 # https://stackoverflow.com/a/71513191
-FROM debian:11
+FROM debian:bookworm-slim
 
 
 SHELL ["/bin/bash", "-c"]
@@ -8,28 +8,29 @@ SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update
 RUN apt-get install -y \
-build-essential \
-curl \
-git \
-libffi-dev \
-libffi7 \
-libgmp-dev \
-libgmp10 \
-libncurses-dev \
-libncurses5 \
-libtinfo5 \
-libnuma-dev \
-vim
+    build-essential \
+    curl \
+    git \
+    jq \
+    libffi-dev \
+    # libffi7 \
+    libgmp-dev \
+    libgmp10 \
+    libncurses-dev \
+    libncurses5 \
+    libtinfo5 \
+    libnuma-dev \
+    vim
 
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | \
-BOOTSTRAP_HASKELL_NONINTERACTIVE=1 \
-BOOTSTRAP_HASKELL_GHC_VERSION=latest \
-BOOTSTRAP_HASKELL_CABAL_VERSION=latest \
-BOOTSTRAP_HASKELL_INSTALL_STACK=1 \
-BOOTSTRAP_HASKELL_INSTALL_HLS=1 \
-BOOTSTRAP_HASKELL_ADJUST_BASHRC=P \
-sh
+    BOOTSTRAP_HASKELL_NONINTERACTIVE=1 \
+    BOOTSTRAP_HASKELL_GHC_VERSION=latest \
+    BOOTSTRAP_HASKELL_CABAL_VERSION=latest \
+    BOOTSTRAP_HASKELL_INSTALL_STACK=1 \
+    BOOTSTRAP_HASKELL_INSTALL_HLS=1 \
+    BOOTSTRAP_HASKELL_ADJUST_BASHRC=P \
+    sh
 
 
 # add ghc to PATH
@@ -40,9 +41,6 @@ RUN ln -s /root/.ghcup/bin/ghci /usr/bin/ghci
 
 
 WORKDIR /vwap/
-
-# allow cabal to profile
-# RUN sed -i 's/-- library-profiling:/-- library-profiling: True/' /root/.config/cabal/config
 
 
 RUN cabal update
@@ -63,6 +61,7 @@ RUN cabal build --only-dependencies -j4 --enable-library-profiling
 
 COPY ./prof.sh /util/prof.sh
 COPY ./vwap /vwap/
+COPY ./testing /testing
 
 
 RUN cabal build
