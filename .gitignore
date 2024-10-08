@@ -1,5 +1,5 @@
 # project specific ignores
-/output/
+*.DS_Store
 
 ## ignore prof dirs
 /prof/
