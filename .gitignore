@@ -1,7 +1,11 @@
 # project specific ignores
+*.DS_Store
 
 ## ignore prof dirs
-**/prof/
+/prof/
+
+## ignore package output
+/package/
 
 ## ignore compiled solutions
 solutions/*/*
