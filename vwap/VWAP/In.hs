@@ -1,140 +1,105 @@
 -- Module For Parsing input CSV
+{-# LANGUAGE OverloadedStrings #-}
 
 
-module VWAP.In  
-( PreReport (..)
-, PreReportValues (..)
-, Symbol
-, processCSVLine
-, emptyPreReport
+module VWAP.In
+( Match (..)
+, SumsMap (..)
+, updateSumsMap
+, emptySumsMap
 ) where
 
 
-import Data.List.Split (splitOn)
-import Data.Int (Int64)
-import Data.Word (Word32)
+-- import Data.List.Split (splitOn)
+-- import Data.Int (Int64)
+-- import Data.Word (Word32)
 import qualified Data.Map as Map
+import Data.Int (Int64)
+
 import qualified Data.Map.Strict as Map.Strict
-import qualified Data.ByteString.Lazy as BL
-import Data.Text    (Text)
-import Data.Csv
-import qualified Data.Vector as V
-import Control.Monad (mzero)
+-- import qualified Data.ByteString.Lazy as BL
+-- import qualified Data.Vector as V
+
+import Data.Text (Text)
+import qualified Data.Csv as Csv
+import qualified Data.Csv.Streaming as CsvS
 
 
-
--- Word32 is actually uint32
-type UInt32 = Word32
 type Symbol = Text
 
-
-data Side = Ask | Bid
-    deriving (Eq, Ord, Show, Read)
-
-
--- input CSV lines
+-- define colun types
 data Match = Match
     { maker :: !Text
     , taker :: !Text
     , symbol :: !Symbol
     , side :: !Text
     , price :: !Int64
-    , quantity :: !UInt32
+    , quantity :: !Int64
     } deriving (Show)
 
 
--- Define how to get a Match from a record (CSV row)
-instance FromRecord Match where
-  parseRecord record =
-    Match
-      <$> record .! 0
-      <*> record .! 1
-      <*> record .! 2
-      <*> record .! 3
-      <*> record .! 4
-      <*> record .! 5
+-- parse columns into records
+instance Csv.FromRecord Match where
+    parseRecord v = Match 
+        <$> v Csv..! 0 
+        <*> v Csv..! 1 
+        <*> v Csv..! 2 
+        <*> v Csv..! 3 
+        <*> v Csv..! 4 
+        <*> v Csv..! 5 
 
 
 -- sums of (price * quantity) & volume
 -- vwap is just cumPQ / volume
-data PreReportValues = PreReportValues
-    { cumPQ :: Int
-    , cumQuant :: Int
+data Sums = Sums
+    { weightedSum :: !Int64
+    , quantSum :: !Int64
     } deriving (Show)
 
 
--- a map of Symbol-to-PreReportValues
-type PreReport = Map.Map Symbol PreReportValues
+-- a map of Symbol: Sums
+type SumsMap = Map.Map Symbol Sums
 
 
 -- return empty Map of correct type
-emptyPreReport :: PreReport
-emptyPreReport = Map.empty :: PreReport
-
-
--- simple CSV line parser
--- probably could use cassava library
---  if more advanced CSV parsing is needed
-parseCSVLine :: BL.ByteString -> Match
-parseCSVLine line = match
-    where
-        match = 
-            case decode NoHeader line of
-                Left err -> error err
-                Right v  ->
-                    if V.null v
-                        then error "No data found"
-                        else (V.head v)
-
-    -- where
-    --     match = decode NoHeader line
-        -- -- char 44 is comma
-        -- [col0, col1, col2, col3, col4, col5] = splitOn "," line
-        -- match = Match   { maker = col0
-        --                 , taker = col1
-        --                 , symbol = col2
-        --                 , side = read col3
-        --                 , price = read col4
-        --                 , quantity = read col5
-        --                 }
+emptySumsMap :: SumsMap
+emptySumsMap = Map.empty :: SumsMap
 
 
 -- calculate p*q for one match 
-pq :: Match -> Int
-pq match = result
-    where
-        intPrice = fromIntegral $ price match
-        intQuantity = fromIntegral $ quantity match
-        result = intPrice * intQuantity
+pq :: Match -> Int64
+pq match = (price match) * (quantity match)
 
 
--- add two PreReport values together
-addPreReportValues :: PreReportValues -> PreReportValues -> PreReportValues
-addPreReportValues preReportValues1 preReportValues2 = result
+-- add two Sums together
+combineSums :: Sums -> Sums -> Sums
+combineSums sums1 sums2 = 
+    Sums
+        {
+           weightedSum = (ws1 + ws2),
+           quantSum = (qs1 + qs2)
+        }
     where
-        addedCumPQ = (cumPQ preReportValues1) + (cumPQ preReportValues2)
-        addedCumQuant = (cumQuant preReportValues1) + (cumQuant preReportValues2)
-        result = PreReportValues {cumPQ = addedCumPQ, cumQuant = addedCumQuant}
+        (Sums ws1 qs1) = sums1
+        (Sums ws2 qs2) = sums2
         
 
--- update a PreReport map with one Match reading
-updatePreReport :: PreReport -> Match -> PreReport
-updatePreReport preReport match = result
+-- update a SumsMap with one Match reading
+updateSumsMap :: SumsMap -> Match -> SumsMap
+updateSumsMap sumsMap match = result
     where
-        symbol' = symbol match
-        quantity' = fromIntegral $ quantity match
-        nextPreReportValues = PreReportValues {cumPQ = (pq match), cumQuant = quantity'}
-        -- if symbol is absent, add the new PreReportValue
-        --  if symbol already exists, add new PreRportValues to existing values
-        --  use strict function since stdin is parsed line-by-line anyway
-        result = Map.Strict.insertWith addPreReportValues symbol' nextPreReportValues preReport
+        (Match _ _ symbol _ _ quantity) = match
+        nextSums = Sums {weightedSum = (pq match), quantSum = quantity}
+        -- if symbol is absent, add the key: value to SumsMap
+        --  if symbol already exists, add new Sums to existing Sums
+        result = Map.insertWith combineSums symbol nextSums sumsMap
 
 
--- process a single line from the CSV
-processCSVLine :: PreReport -> BL.ByteString -> PreReport
-processCSVLine preReport line = updatedPreReport
-    where
-        -- parse a single CSV line
-        match = parseCSVLine line
-        -- update cumulative preReport map with the match
-        updatedPreReport = updatePreReport preReport match
+-- -- process a single line from the CSV
+-- processCSVLine :: PreReport -> BL.ByteString -> PreReport
+-- processCSVLine preReport line = updatedPreReport
+--     where
+--         -- parse a single CSV line
+--         match = parseCSVLine line
+--         -- update cumulative preReport map with the match
+--         updatedPreReport = updatePreReport preReport match
