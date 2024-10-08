@@ -23,14 +23,17 @@ data ReportValues = ReportValues
     } deriving (Show)
 
 
+-- round to one decimal place
+roundToOneDecimal :: Double -> Double
+roundToOneDecimal x = fromIntegral (round (x * 10)) / 10
+
 -- set vwap precision
-instance ToJSON ReportValues
-    where
-        toJSON (ReportValues vwap volume) =
-            object 
-                [ "vwap" .= (printf "%.1f" vwap :: String)
-                , "volume" .= volume
-                ]
+instance ToJSON ReportValues where
+    toJSON (ReportValues vwap volume) =
+        object 
+            [ "vwap" .= roundToOneDecimal vwap
+            , "volume" .= volume
+            ]
 
 
 -- a map of Symbol-to-ReportValues
