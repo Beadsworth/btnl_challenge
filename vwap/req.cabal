@@ -72,13 +72,11 @@ executable VWAP
 
     -- Other library packages from which modules are imported.
     build-depends:    base >=4.19.0.0,
-                      split >= 0.2.4,
+                      bytestring,
                       text,
                       containers >=0.4.0.0,
-                      aeson >=2.0,
-                      bytestring,
                       cassava >= 0.5,
-                      vector
+                      aeson >=2.0
 
     -- Directories containing source files.
     hs-source-dirs:

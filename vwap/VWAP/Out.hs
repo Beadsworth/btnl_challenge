@@ -10,7 +10,6 @@ module VWAP.Out
 import Data.Int (Int64)
 import qualified Data.Map as Map
 import qualified Data.ByteString.Lazy.Char8 as B
-import Text.Printf (printf)
 import Data.Aeson (ToJSON, toJSON, object, (.=), encode, toEncoding)
 
 import VWAP.In (SumsMap, Sums (..), Symbol)

@@ -15,7 +15,6 @@ module VWAP.In
 import Data.Text (Text)
 import Data.Int (Int64)
 import qualified Data.Map as Map
-import qualified Data.Map.Strict as Map.Strict
 import qualified Data.Csv as Csv
 import qualified Data.Csv.Streaming as CsvS
 
