@@ -20,7 +20,7 @@ To build inside docker, run:
 ./build.sh
 ```
 
-A build from zero takes about 10 minutes.
+A build from zero takes about 10 minutes.  This project uses the `beadsworth/haskell-base` base image. which is simply debian-12 with ghcup installed.
 
 
 ### Testing in Docker
