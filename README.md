@@ -116,8 +116,4 @@ If testing is done through `docker`, these profiling statistics are output to th
 
 ### Room for improvement
 - validate incoming `.csv`
-- Better security for docker
-    - specify non-root user
-    - prefer to not run ghcup install from curl
-- Create docker base image with ghcup pre-installed
-    - this could be stored on an in-house artifact repository
+- Better security for docker (specify non-root user)
