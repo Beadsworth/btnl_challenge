@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # format day arg
 image_name="btnl_challenge"

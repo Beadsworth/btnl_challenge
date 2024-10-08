@@ -4,6 +4,9 @@
 ## ignore prof dirs
 /prof/
 
+## ignore package output
+/package/
+
 ## ignore compiled solutions
 solutions/*/*
 !solutions/*/**/
