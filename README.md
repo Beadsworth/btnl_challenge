@@ -1,35 +1,94 @@
 # BTNL Challenge
+## James Beadsworth
+- email: james.beadsworth@gmail.com
+- linkedin: [https://www.linkedin.com/in/james-beadsworth/](https://www.linkedin.com/in/james-beadsworth/)
 
-The project uses docker to run `ghc` and `ghci`.
+## About
+This tool reads a `.csv` file full of `Match` transactions and generates a qwap JSON report.
 
-Solutions, input files, and test files should be saved in the corresponding `./solutions/dayXX` directory.
 
-## Building
+## Using Docker
+For the sake of portability, I am building/testing/running haskell in docker.  If you prefer working with cabal natively, I have added a section for that below.
 
-To build in top-level changes into the docker image (i.e. not solutions), run:
+
+### Building in Docker
+
+To build inside docker, run:
 
 ```
 ./build.sh
 ```
 
-## Solving
 
-To solve a problem (solutions are mounted in an editable volume), run:
+### Testing in Docker
 
-```
-./prof.sh $day
-```
-
-where `day=` the current day you are working on (int).
-
-To run an interactive `ghci` session, run:
+After building, you can run simple automated tests inside docker:
 
 ```
-./ghci.sh
+./test.sh
 ```
 
-## Inside the container
 
-The working directory is `/opt/btnl_challenge/`.
-The current day's solution directory will be "volumed" to `/opt/btnl_challenge/Solutions/`.
-When you run `solve.sh` outside the container, `solve.hs` will import the current day's packages, then compile & run inside the container.
+### Running in Docker
+
+After building, you can run qwap like so:
+
+```
+cat some_file.csv | ./run.sh
+```
+
+This will pipe your `.csv` file into `cabal run`
+
+
+## Building natively with cabal
+
+If desired, you can perform a native build using `cabal`:
+
+```
+# move to sub-directory
+cd vwap
+
+# build executable
+cabal build
+
+# run executable
+cat some_file.csv | cabal run
+
+# you can find the bin file with this:
+cabal list-bin VWAP
+```
+
+
+## Design
+
+### Method & Execution
+A list of transactions could potentially be very long.  I tried to reduce memory usage by streaming stdin and processing the data match-by-match.
+
+Basic program flow:
+1. start with an empty Map (dictionary)
+2. read a Match from stdin
+3. accumulate new Match row into the Map.  At this point, I'm just accumulating sigma-pq and volume
+4. after stdin is completely consumed, calculate qwap = sigma-pq / volume
+5. format JSON and print to stdout
+
+
+### Performance
+On Apple M1 Pro, I process 1 million rows in ~4 seconds with ~200MB peak memory consumption.
+
+Execution time might improve if I took advantage of more laziness.  Most time is spent decoding/parsing `.csv` rows, so that would be the first place to look for optimizations.
+
+If testing is done through `docker`, these profiling statistics are output to the `./prof` directory:
+
+```
+./test.sh
+```
+
+### Usage Notes (& assumptions)
+- output JSON will be unordered
+    - a tool such as `jq` can be used for ordering, validation, etc.
+- input `.csv` file is expected to have no formatting errors
+- vwap performs little (if any) `.csv` validation
+    - integer overflow is definetly possible and should be fixed later
+- an empty `.csv` will return an empty JSON object
+- a poorly formatted `.csv` (including a file with whitespace-only characters) will throw an error
+- a product with zero volume will report `vwap == 0`
