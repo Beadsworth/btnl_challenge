@@ -4,28 +4,24 @@
 
 module VWAP.In
 ( Match (..)
+, Sums (..)
 , SumsMap (..)
+, Symbol
 , updateSumsMap
 , emptySumsMap
 ) where
 
 
--- import Data.List.Split (splitOn)
--- import Data.Int (Int64)
--- import Data.Word (Word32)
-import qualified Data.Map as Map
-import Data.Int (Int64)
-
-import qualified Data.Map.Strict as Map.Strict
--- import qualified Data.ByteString.Lazy as BL
--- import qualified Data.Vector as V
-
 import Data.Text (Text)
+import Data.Int (Int64)
+import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map.Strict
 import qualified Data.Csv as Csv
 import qualified Data.Csv.Streaming as CsvS
 
 
 type Symbol = Text
+
 
 -- define colun types
 data Match = Match
@@ -57,7 +53,7 @@ data Sums = Sums
     } deriving (Show)
 
 
--- a map of Symbol: Sums
+-- a Map of Symbol: Sums
 type SumsMap = Map.Map Symbol Sums
 
 
@@ -93,13 +89,3 @@ updateSumsMap sumsMap match = result
         -- if symbol is absent, add the key: value to SumsMap
         --  if symbol already exists, add new Sums to existing Sums
         result = Map.insertWith combineSums symbol nextSums sumsMap
-
-
--- -- process a single line from the CSV
--- processCSVLine :: PreReport -> BL.ByteString -> PreReport
--- processCSVLine preReport line = updatedPreReport
---     where
---         -- parse a single CSV line
---         match = parseCSVLine line
---         -- update cumulative preReport map with the match
---         updatedPreReport = updatePreReport preReport match

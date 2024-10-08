@@ -1,23 +1,25 @@
--- Module For Parsing input CSV
+-- Module for printing out JSON results
 {-# LANGUAGE OverloadedStrings #-}
 
 
 module VWAP.Out 
-( preReport2ReportJson
+( sumsMap2ReportJSON
 ) where
 
 
-import Data.Aeson (ToJSON, toJSON, object, (.=), encode, toEncoding)
+import Data.Int (Int64)
 import qualified Data.Map as Map
 import qualified Data.ByteString.Lazy.Char8 as B
-import VWAP.In (PreReport, PreReportValues (..), Symbol)
 import Text.Printf (printf)
+import Data.Aeson (ToJSON, toJSON, object, (.=), encode, toEncoding)
+
+import VWAP.In (SumsMap, Sums (..), Symbol)
 
 
 -- final values reported for each symbol
 data ReportValues = ReportValues
-    { vwap :: Double
-    , volume :: Int
+    { vwap :: !Double
+    , volume :: !Int64
     } deriving (Show)
 
 
@@ -35,31 +37,31 @@ instance ToJSON ReportValues
 type Report = Map.Map Symbol ReportValues
 
 
--- volume = cumQuant
--- VWAP = cumPQ / volume
-convertValues :: PreReportValues -> ReportValues
-convertValues preReportValues = reportValues
+-- volume = quantSum
+-- VWAP = weightedSum / volume
+convertValues :: Sums -> ReportValues
+convertValues sums = reportValues
     where
         -- volume should never be zero, skipping validation...
-        volume = cumQuant preReportValues
-        doubleCumPQ = fromIntegral (cumPQ preReportValues) :: Double
-        rawVWAP = doubleCumPQ / fromIntegral volume
+        (Sums weightedSum volume) = sums
+        doubleWeightedSum = fromIntegral weightedSum :: Double
+        rawVWAP = doubleWeightedSum / (fromIntegral volume :: Double)
         vwap = read (printf "%.1f" rawVWAP) :: Double
         reportValues = ReportValues {vwap = vwap, volume = volume}
 
 
--- convert PreReport Map to Report
-preReport2Report :: PreReport -> Report
-preReport2Report preReport = result
+-- convert SumsMap Map to Report
+sumsMap2Report :: SumsMap -> Report
+sumsMap2Report sumsMap = result
     where
-        result = Map.map convertValues preReport
+        result = Map.map convertValues sumsMap
 
 
--- Function to convert a Map to JSON
+-- function to convert a Map to JSON
 report2Json :: Report -> B.ByteString
 report2Json report = encode $ toJSON report
 
 
 -- convenience function, just export this
-preReport2ReportJson :: PreReport -> B.ByteString
-preReport2ReportJson = report2Json . preReport2Report
+sumsMap2ReportJSON :: SumsMap -> B.ByteString
+sumsMap2ReportJSON = report2Json . sumsMap2Report

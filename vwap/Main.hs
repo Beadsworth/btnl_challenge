@@ -1,16 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 
-
-
 import qualified Data.Csv as Csv
 import qualified Data.Csv.Streaming as CsvS
 import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Lazy.Char8 as BSL8
 import qualified Data.Foldable as F
 import System.IO (stdin)
 
-import VWAP.In (Match (..), updateSumsMap, emptySumsMap, SumsMap)
--- import VWAP.Out (preReport2ReportJson)
+import VWAP.In (Match, updateSumsMap, emptySumsMap)
+import VWAP.Out (sumsMap2ReportJSON)
 
 
 main :: IO ()
@@ -25,7 +24,10 @@ main = do
 
     -- fold over the stream to accumulate totals
     -- strict foldl prevents too much thunking
-    let result = F.foldl' updateSumsMap emptySumsMap csvStream
+    let sumsMap = F.foldl' updateSumsMap emptySumsMap csvStream
+
+    -- convert SumsMap into Report
+    let reportJSON = sumsMap2ReportJSON sumsMap
     
-    -- Print the result
-    print result
+    -- print Report to stdout
+    BSL8.putStrLn reportJSON
