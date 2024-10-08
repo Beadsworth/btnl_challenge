@@ -4,7 +4,7 @@
 - linkedin: [https://www.linkedin.com/in/james-beadsworth/](https://www.linkedin.com/in/james-beadsworth/)
 
 ## About
-This tool reads a `.csv` file full of `Match` transactions and generates a qwap JSON report.
+This tool reads a `.csv` file full of `Match` transactions and generates a vwap JSON report.
 
 
 ## Using Docker
@@ -35,7 +35,7 @@ ChatGPT was used to generate a simple test framework.  The ChatGPT logs can be f
 
 ### Running in Docker
 
-After building, you can run qwap like so:
+After building, you can run vwap like so:
 
 ```
 cat some_file.csv | ./run.sh
@@ -72,7 +72,7 @@ Basic program flow:
 1. start with an empty Map (dictionary)
 2. read a Match from stdin
 3. accumulate new Match row into the Map.  At this point, I'm just accumulating sigma-pq and volume
-4. after stdin is completely consumed, calculate qwap = sigma-pq / volume
+4. after stdin is completely consumed, calculate vwap = sigma-pq / volume
 5. format JSON and print to stdout
 
 
