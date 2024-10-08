@@ -16,6 +16,7 @@ For the sake of portability, I am building/testing/running haskell in docker.  I
 To build inside docker, run:
 
 ```
+# execute from same directory as README.md
 ./build.sh
 ```
 
@@ -25,6 +26,7 @@ To build inside docker, run:
 After building, you can run simple automated tests inside docker:
 
 ```
+# execute from same directory as README.md
 ./test.sh
 ```
 
@@ -38,6 +40,7 @@ ChatGPT was used to generate a simple test framework.  The ChatGPT logs can be f
 After building, you can run vwap like so:
 
 ```
+# execute from same directory as README.md
 cat some_file.csv | ./run.sh
 ```
 
@@ -84,6 +87,7 @@ Execution time might improve if I took advantage of more laziness.  Most time is
 If testing is done through `docker`, these profiling statistics are output to the `./prof` directory:
 
 ```
+# execute from same directory as README.md
 ./test.sh
 ```
 
@@ -96,3 +100,12 @@ If testing is done through `docker`, these profiling statistics are output to th
 - an empty `.csv` will return an empty JSON object
 - a poorly formatted `.csv` (including a file with whitespace-only characters) will throw an error
 - a product with zero volume will report `vwap == 0`
+
+
+### Room for improvement
+- validate incoming `.csv`
+- Better security for docker
+    - specify non-root user
+    - prefer to not run ghcup install from curl
+- Create docker base image with ghcup pre-installed
+    - this could be stored on an in-house artifact repository
