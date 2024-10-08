@@ -27,11 +27,12 @@ data ReportValues = ReportValues
 roundToOneDecimal :: Double -> Double
 roundToOneDecimal x = fromIntegral (round (x * 10)) / 10
 
--- set vwap precision
+
+-- define ReportValues output JSON
 instance ToJSON ReportValues where
     toJSON (ReportValues vwap volume) =
         object 
-            [ "vwap" .= roundToOneDecimal vwap
+            [ "vwap" .= vwap
             , "volume" .= volume
             ]
 
@@ -49,7 +50,7 @@ convertValues sums = reportValues
         (Sums weightedSum volume) = sums
         doubleWeightedSum = fromIntegral weightedSum :: Double
         rawVWAP = doubleWeightedSum / (fromIntegral volume :: Double)
-        vwap = read (printf "%.1f" rawVWAP) :: Double
+        vwap = roundToOneDecimal rawVWAP
         reportValues = ReportValues {vwap = vwap, volume = volume}
 
 
