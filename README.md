@@ -20,6 +20,8 @@ To build inside docker, run:
 ./build.sh
 ```
 
+A build from zero takes about 10 minutes.
+
 
 ### Testing in Docker
 
@@ -65,6 +67,16 @@ cat some_file.csv | cabal run
 cabal list-bin VWAP
 ```
 
+This is my personal setup:
+
+```
+Macbook Pro M1
+GHCup 0.1.30.0
+Stack 2.11.1
+HLS   2.4.0.0
+cabal 3.6.2.0-p1
+GHC   9.8.2      base-4.19.1.0
+```
 
 ## Design
 
