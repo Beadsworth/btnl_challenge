@@ -10,4 +10,5 @@ then
     mkdir -p "$OUTPUT_DIR"
 fi
 
-tar -czvf "$OUTPUT_PATH" .
+# only package files tracked by git
+git ls-files | tar -czf "$OUTPUT_PATH" -T -
