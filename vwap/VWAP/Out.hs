@@ -41,6 +41,11 @@ instance ToJSON ReportValues where
 type Report = Map.Map Symbol ReportValues
 
 
+safeDivide :: Double -> Double -> Double
+safeDivide n 0 = 0 :: Double
+safeDivide n d = n / d :: Double
+
+
 -- volume = quantSum
 -- VWAP = weightedSum / volume
 convertValues :: Sums -> ReportValues
@@ -49,7 +54,8 @@ convertValues sums = reportValues
         -- volume should never be zero, skipping validation...
         (Sums weightedSum volume) = sums
         doubleWeightedSum = fromIntegral weightedSum :: Double
-        rawVWAP = doubleWeightedSum / (fromIntegral volume :: Double)
+        doubleVolume = fromIntegral volume :: Double
+        rawVWAP = doubleWeightedSum `safeDivide` doubleVolume
         vwap = roundToOneDecimal rawVWAP
         reportValues = ReportValues {vwap = vwap, volume = volume}
 
