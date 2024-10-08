@@ -28,6 +28,10 @@ After building, you can run simple automated tests inside docker:
 ./test.sh
 ```
 
+ChatGPT was used to generate a simple test framework.  The ChatGPT logs can be found here:
+
+[ChatGPT Logs](https://chatgpt.com/share/67039c63-e8f8-8008-9b99-1da6131124b9)
+
 
 ### Running in Docker
 
