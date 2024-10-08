@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# make sure the image is re-built if needed
+./build.sh
+
 # format day arg
 image_name="btnl_challenge"
 container_name="$image_name-local"
