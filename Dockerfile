@@ -3,6 +3,10 @@
 FROM beadsworth/haskell-base
 
 
+RUN apt-get install -y \
+    libz-dev
+
+
 WORKDIR /vwap/
 
 
