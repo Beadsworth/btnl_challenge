@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE BangPatterns #-}
 
 
 import qualified Data.Csv as Csv
@@ -38,7 +39,7 @@ readFromStdin sumsMapVar = forever $ do
             -- fold over the stream to accumulate totals
             -- strict foldl prevents too much thunking
             modifyMVar_ sumsMapVar $ \sumsMap ->
-                return $ F.foldl' updateSumsMap sumsMap csvStream
+                return $! F.foldl' updateSumsMap sumsMap csvStream
 
 
 main :: IO ()
