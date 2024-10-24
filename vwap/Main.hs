@@ -16,30 +16,7 @@ import qualified Web.Scotty as Scotty
 
 
 import VWAP.In (Match, SumsMap, updateSumsMap, emptySumsMap)
-import VWAP.Out (sumsMap2ReportJSON)
-
-
--- Function to read from stdin and update the sumsMap
-readFromStdin :: MVar SumsMap -> IO ()
-readFromStdin sumsMapVar = forever $ do
-    eof <- hIsEOF stdin
-    if eof
-        then throwIO UserInterrupt  -- This will break out of the forever loop
-        else do
-            line <- BS8.hGetLine stdin
-
-            -- convert to lazy ByteString
-            let input = BSL8.fromStrict line
-            
-            -- parse the CSV using streaming
-            -- if incoming CSV is large, this 
-            -- will hopefully prevent large memory consumption
-            let csvStream = CsvS.decode Csv.NoHeader input :: CsvS.Records Match
-
-            -- fold over the stream to accumulate totals
-            -- strict foldl prevents too much thunking
-            modifyMVar_ sumsMapVar $ \sumsMap ->
-                return $! F.foldl' updateSumsMap sumsMap csvStream
+import VWAP.Out (sumsMap2Report)
 
 
 main :: IO ()
@@ -48,24 +25,30 @@ main = do
     -- start MVar with empty sumsMap
     sumsMapVar <- newMVar emptySumsMap
 
-    -- spawn the stdin reader in a separate thread using forkIO
-    _ <- forkIO $ (readFromStdin sumsMapVar) `catch` handleInterrupt
-
     -- start the scotty server
     Scotty.scotty 3000 $ do
-        Scotty.get "/summary" $ do
+        
+        Scotty.post "/matches" $ do
+            -- Read and decode the request body as UTF-8
+            b <- Scotty.body
 
-            -- Grab the latest sumsMap
-            sumsMap <- liftIO $ readMVar sumsMapVar
+            let input = b
+    
+            -- parse the CSV using streaming
+            -- if incoming CSV is large, this 
+            -- will hopefully prevent large memory consumption
+            let csvStream = CsvS.decode Csv.NoHeader input :: CsvS.Records Match
+
+            -- fold over the stream to accumulate totals
+            -- strict foldl prevents too much thunking
+            let sumsMap = F.foldl' updateSumsMap emptySumsMap csvStream
 
             -- convert SumsMap into Report
-            let reportJSON = sumsMap2ReportJSON sumsMap
-
-            -- set header
-            Scotty.setHeader "Content-Type" "application/json"
+            let report = sumsMap2Report sumsMap
 
             -- set response
-            Scotty.raw reportJSON
+            Scotty.json report
+
 
     where
         handleInterrupt :: SomeException -> IO ()

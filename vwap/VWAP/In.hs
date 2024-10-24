@@ -17,9 +17,19 @@ import Data.Int (Int64)
 import qualified Data.Map as Map
 import qualified Data.Csv as Csv
 import qualified Data.Csv.Streaming as CsvS
+import Data.Csv (Parser, Field, FromField)
 
 
 type Symbol = Text
+data Side = Bid | Ask
+    deriving (Show, Read)
+
+
+instance FromField Side where
+    parseField s
+        | s == "Bid"  = pure Bid
+        | s == "Ask"  = pure Ask
+        | otherwise = fail $ "bad parsing of side"
 
 
 -- define colun types
@@ -27,7 +37,7 @@ data Match = Match
     { maker :: !Text
     , taker :: !Text
     , symbol :: !Symbol
-    , side :: !Text
+    , side :: !Side
     , price :: !Int64
     , quantity :: !Int64
     } deriving (Show)

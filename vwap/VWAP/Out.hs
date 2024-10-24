@@ -3,7 +3,8 @@
 
 
 module VWAP.Out 
-( sumsMap2ReportJSON
+( sumsMap2ReportJSON,
+  sumsMap2Report
 ) where
 
 
