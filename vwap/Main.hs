@@ -3,10 +3,13 @@
 
 import qualified Data.Csv as Csv
 import qualified Data.Csv.Streaming as CsvS
-import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.ByteString.Lazy.Char8 as BSL8
 import qualified Data.Foldable as F
 import System.IO (stdin)
+import Control.Concurrent (newMVar, modifyMVar_, readMVar)
+import Control.Monad.IO.Class (liftIO)
+
 
 import VWAP.In (Match, updateSumsMap, emptySumsMap)
 import VWAP.Out (sumsMap2ReportJSON)
@@ -14,8 +17,11 @@ import VWAP.Out (sumsMap2ReportJSON)
 
 main :: IO ()
 main = do
+    -- start MVar with empty sumsMap
+    sumsMapVar <- newMVar emptySumsMap
+
     -- Read CSV data from stdin as lazy ByteString
-    input <- BSL.hGetContents stdin
+    input <- BSL8.hGetContents stdin
     
     -- parse the CSV using streaming
     -- if incoming CSV is large, this 
@@ -24,7 +30,11 @@ main = do
 
     -- fold over the stream to accumulate totals
     -- strict foldl prevents too much thunking
-    let sumsMap = F.foldl' updateSumsMap emptySumsMap csvStream
+    modifyMVar_ sumsMapVar $ \sumsMap ->
+        return $ F.foldl' updateSumsMap sumsMap csvStream
+
+    -- Grab the latest sumsMap
+    sumsMap <- liftIO $ readMVar sumsMapVar
 
     -- convert SumsMap into Report
     let reportJSON = sumsMap2ReportJSON sumsMap

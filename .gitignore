@@ -1,5 +1,6 @@
 # project specific ignores
 *.DS_Store
+/notes
 
 ## ignore prof dirs
 /prof/
