@@ -27,6 +27,17 @@ main = do
 
     -- start the scotty server
     Scotty.scotty 3000 $ do
+
+        Scotty.get "/summary" $ do
+
+            -- Grab the latest sumsMap
+            sumsMap <- liftIO $ readMVar sumsMapVar
+
+            -- convert SumsMap into Report
+            let report = sumsMap2Report sumsMap
+
+            -- set response
+            Scotty.json report
         
         Scotty.post "/matches" $ do
             -- Read and decode the request body as UTF-8
@@ -41,7 +52,11 @@ main = do
 
             -- fold over the stream to accumulate totals
             -- strict foldl prevents too much thunking
-            let sumsMap = F.foldl' updateSumsMap emptySumsMap csvStream
+            liftIO $ modifyMVar_ sumsMapVar $ \sumsMap ->
+                return $! F.foldl' updateSumsMap sumsMap csvStream
+
+            -- Grab the latest sumsMap
+            sumsMap <- liftIO $ readMVar sumsMapVar
 
             -- convert SumsMap into Report
             let report = sumsMap2Report sumsMap
