@@ -16,5 +16,6 @@ cat | docker run \
     -i \
     --name "$container_name" \
     -v "$(pwd)/$prof_dir":"$container_prof_dir" \
+    -p "3000:3000" \
     $image_name \
     cabal run VWAP
