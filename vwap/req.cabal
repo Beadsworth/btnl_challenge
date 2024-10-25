@@ -77,7 +77,11 @@ executable VWAP
                       cassava (>= 0.5),
                       containers (>=0.4.0.0),
                       scotty (>=0.22),
-                      text (>=0.11.3.1)
+                      text (>=0.11.3.1),
+                      wai (>=3.2.4),
+                      warp (>=3.4.3),
+                      websockets (>=0.12.4.0),
+                      wai-websockets (>=3.0.1.2)
 
     -- Directories containing source files.
     hs-source-dirs:

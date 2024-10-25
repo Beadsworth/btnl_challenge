@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE LambdaCase #-}
 
 
 import qualified Data.Csv as Csv
@@ -7,12 +8,17 @@ import qualified Data.Csv.Streaming as CsvS
 import qualified Data.ByteString.Char8 as BS8
 import qualified Data.ByteString.Lazy.Char8 as BSL8
 import qualified Data.Foldable as F
+import Data.Text (Text)
 import System.IO (stdin, hIsEOF)
 import Control.Concurrent (MVar, newMVar, modifyMVar_, readMVar, forkIO)
 import Control.Monad.IO.Class (liftIO)
 import Control.Exception (SomeException, AsyncException(UserInterrupt), catch, throwIO)
 import Control.Monad (forever)
 import qualified Web.Scotty as Scotty
+import qualified Network.Wai as Wai
+import qualified Network.WebSockets as WS
+import Network.Wai.Handler.WebSockets (websocketsOr)
+import qualified Network.Wai.Handler.Warp as Warp
 
 
 import VWAP.In (Match, SumsMap, updateSumsMap, emptySumsMap)
@@ -25,8 +31,26 @@ main = do
     -- start MVar with empty sumsMap
     sumsMapVar <- newMVar emptySumsMap
 
-    -- start the scotty server
-    Scotty.scotty 3000 $ do
+    backupApp <- Scotty.scottyApp $ doScotty sumsMapVar
+    Warp.run 3000 $ websocketsOr WS.defaultConnectionOptions (wsApp sumsMapVar) backupApp
+
+    where
+        wsApp :: MVar SumsMap -> WS.ServerApp
+        wsApp sumsMapVar pending_conn = do
+            conn <- WS.acceptRequest pending_conn
+
+            WS.receiveDataMessage conn >>= \case 
+                WS.Text input _ -> do
+                    let csvStream = CsvS.decode Csv.NoHeader input :: CsvS.Records Match
+                    liftIO $ modifyMVar_ sumsMapVar $ \sumsMap ->
+                        return $! F.foldl' updateSumsMap sumsMap csvStream
+                WS.Binary _ -> undefined
+            
+            WS.sendTextData conn ("Hello, client!" :: Text)
+
+
+doScotty :: MVar SumsMap -> Scotty.ScottyM ()
+doScotty sumsMapVar = do
 
         Scotty.get "/summary" $ do
 
